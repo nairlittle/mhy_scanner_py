@@ -60,7 +60,6 @@
                 <div class="qrcode-container">
                     <div class="qrcode-box" id="qrcodeBox">
                         <div id="qrcodePlaceholder">点击刷新获取二维码</div>
-                        <img id="qrcodeImg" style="display:none" alt="登录二维码">
                         <button id="qrcodeRefreshBtn" class="qrcode-overlay-btn" style="display:none">二维码已过期<br>点击刷新</button>
                     </div>
                     <div id="qrcodeStatus" style="margin-top:12px;text-align:center;color:#888;"></div>
@@ -120,8 +119,6 @@
                 </div>
             </div>
 
-            <!-- 登录结果 -->
-            <div id="loginResult" style="margin-top:16px;display:none"></div>
         </section>
 
         <!-- 屏幕监控页 -->
@@ -265,7 +262,6 @@
         <!-- 右键菜单 -->
         <div id="contextMenu" class="context-menu">
             <button class="menu-item" data-action="copy-uid">复制 UID</button>
-            <button class="menu-item" data-action="copy-stoken">复制 SToken</button>
             <div class="menu-divider"></div>
             <button class="menu-item menu-item-danger" data-action="delete">删除账号</button>
         </div>

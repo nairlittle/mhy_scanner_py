@@ -72,32 +72,34 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // ============ 二维码登录 ============
 let qrPollTimer = null;
+let qrCodeInstance = null;
 
 document.getElementById('startQRCodeBtn').addEventListener('click', startQRCodeLogin);
 document.getElementById('qrcodeRefreshBtn').addEventListener('click', startQRCodeLogin);
 
 async function startQRCodeLogin() {
     stopQRPolling();
-    const img = document.getElementById('qrcodeImg');
+    if (qrCodeInstance) {
+        qrCodeInstance.clear();
+        qrCodeInstance = null;
+    }
     const placeholder = document.getElementById('qrcodePlaceholder');
     const refreshBtn = document.getElementById('qrcodeRefreshBtn');
     const status = document.getElementById('qrcodeStatus');
     const qrBox = document.getElementById('qrcodeBox');
     
     refreshBtn.style.display = 'none';
-    img.style.display = 'none';
     placeholder.style.display = 'flex';
     placeholder.textContent = '获取中...';
     status.textContent = '';
     
-    // 清除旧的二维码
+    // 清除旧的二维码canvas
     qrBox.querySelectorAll('canvas').forEach(c => c.remove());
     
     try {
         const r = await API.get('/api/auth/qrcode');
         if (r.url) {
-            // 用 JS 生成二维码图片
-            new QRCode(qrBox, {
+            qrCodeInstance = new QRCode(qrBox, {
                 text: r.url,
                 width: 200,
                 height: 200,
@@ -160,7 +162,6 @@ function stopQRPolling() {
 
 // ============ 短信登录 ============
 const smsMobile = document.getElementById('smsMobile');
-let smsGtChallenge = null;
 let smsActionType = '';
 let geetestCaptchaObj = null;
 
@@ -894,8 +895,6 @@ contextMenu.addEventListener('click', (e) => {
     if (action === 'copy-uid') {
         const uid = cells[2] ? cells[2].textContent : '';
         navigator.clipboard.writeText(uid).then(() => toast('UID已复制', 'success'));
-    } else if (action === 'copy-stoken') {
-        toast('SToken已不在API中返回', 'info');
     } else if (action === 'delete') {
         deleteAccount(contextMenuRow);
     }

@@ -12,7 +12,6 @@
     --danger: #ef4444;
     --danger-hover: #dc2626;
     --success: #22c55e;
-    --warning: #f59e0b;
     --bg: #f8fafc;
     --bg-card: #ffffff;
     --bg-sidebar: #1e1b4b;
@@ -203,12 +202,6 @@ body {
     overflow: hidden;
 }
 
-.qrcode-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
 .qrcode-overlay-btn {
     position: absolute;
     inset: 0;
@@ -377,10 +370,6 @@ textarea {
     max-height: 200px;
     overflow-y: auto;
     display: none;
-}
-
-.result-area:not(:empty) {
-    display: block;
 }
 
 .result-item {
