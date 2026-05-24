@@ -7,45 +7,40 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <!-- 侧边栏 -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
+    <!-- 顶部导航 -->
+    <header class="topbar">
+        <a href="#" class="topbar-brand">
             <h1>MHY Scanner</h1>
             <span class="version">v2.0</span>
-        </div>
-        <nav class="sidebar-nav">
+        </a>
+        <nav class="topbar-nav">
             <a href="#" class="nav-item active" data-page="login">
-                <span class="nav-icon">🔑</span>
-                <span>扫码登录</span>
+                <span class="nav-icon">🔑</span> <span>扫码登录</span>
             </a>
             <a href="#" class="nav-item" data-page="screen">
-                <span class="nav-icon">🖥️</span>
-                <span>屏幕监控</span>
+                <span class="nav-icon">🖥️</span> <span>屏幕监控</span>
             </a>
             <a href="#" class="nav-item" data-page="live">
-                <span class="nav-icon">📺</span>
-                <span>直播监控</span>
+                <span class="nav-icon">📺</span> <span>直播监控</span>
             </a>
             <a href="#" class="nav-item" data-page="accounts">
-                <span class="nav-icon">👤</span>
-                <span>账号管理</span>
+                <span class="nav-icon">👤</span> <span>账号管理</span>
             </a>
             <a href="#" class="nav-item" data-page="settings">
-                <span class="nav-icon">⚙️</span>
-                <span>系统设置</span>
+                <span class="nav-icon">⚙️</span> <span>设置</span>
             </a>
         </nav>
-        <div class="sidebar-footer">
-            <span class="status-dot" id="serverStatus"></span>
-            <span id="serverStatusText">就绪</span>
+        <div class="topbar-status">
+            <span class="status-dot"></span> <span>服务运行中</span>
         </div>
-    </aside>
+    </header>
 
     <!-- 主内容 -->
     <main class="main-content">
-        <!-- 扫码登录页 -->
+
+        <!-- 扫码登录 -->
         <section id="page-login" class="page active">
-            <h2>米哈游扫码登录</h2>
+            <h2>扫码登录</h2>
             <p class="subtitle">添加/登录米哈游账号，用于后续扫码抢码</p>
 
             <div class="login-tabs">
@@ -55,21 +50,19 @@
                 <button class="tab-btn" data-tab="bh3">崩坏3B服</button>
             </div>
 
-            <!-- 二维码登录 -->
             <div id="tab-qrcode" class="tab-panel active">
                 <div class="qrcode-container">
                     <div class="qrcode-box" id="qrcodeBox">
-                        <div id="qrcodePlaceholder">点击刷新获取二维码</div>
-                        <button id="qrcodeRefreshBtn" class="qrcode-overlay-btn" style="display:none">二维码已过期<br>点击刷新</button>
+                        <div id="qrcodePlaceholder">点击下方按钮获取二维码</div>
+                        <button id="qrcodeRefreshBtn" class="qrcode-overlay-btn" style="display:none">已过期<br>点击刷新</button>
                     </div>
-                    <div id="qrcodeStatus" style="margin-top:12px;text-align:center;color:#888;"></div>
+                    <div id="qrcodeStatus" style="margin-top:12px;color:#888;font-size:13px;"></div>
                 </div>
                 <div style="text-align:center;margin-top:16px">
                     <button id="startQRCodeBtn" class="btn btn-primary">获取登录二维码</button>
                 </div>
             </div>
 
-            <!-- 短信登录 -->
             <div id="tab-sms" class="tab-panel">
                 <div class="form-group">
                     <label>手机号</label>
@@ -79,116 +72,130 @@
                         <button id="smsSendBtn" class="btn btn-outline" disabled>发送验证码</button>
                     </div>
                 </div>
-                <div class="form-group" style="margin-top:16px">
+                <div class="form-group">
                     <label>验证码</label>
                     <input type="text" id="smsCode" placeholder="请输入验证码">
                 </div>
-                <div style="margin-top:20px;text-align:center">
-                    <button id="smsLoginBtn" class="btn btn-primary">确认登录</button>
+                <div style="margin-top:20px">
+                    <button id="smsLoginBtn" class="btn btn-primary btn-block">确认登录</button>
                 </div>
-                <div id="smsTimer" style="text-align:center;margin-top:8px;color:#888;"></div>
+                <div id="smsTimer" style="text-align:center;margin-top:8px;color:#888;font-size:13px;"></div>
             </div>
 
-            <!-- Cookie登录 -->
             <div id="tab-cookie" class="tab-panel">
                 <div class="form-group">
                     <label>包含SToken的Cookie</label>
                     <textarea id="cookieInput" rows="4" placeholder="在这里粘贴包含SToken的Cookie..."></textarea>
                 </div>
-                <div class="form-group" style="margin-top:12px">
+                <div class="form-group">
                     <label>备注（可选）</label>
                     <input type="text" id="cookieNote" placeholder="账号备注">
                 </div>
-                <div style="margin-top:16px;text-align:center">
-                    <button id="cookieLoginBtn" class="btn btn-primary">登录</button>
-                </div>
+                <button id="cookieLoginBtn" class="btn btn-primary btn-block">登录</button>
             </div>
 
-            <!-- BH3 B服登录 -->
             <div id="tab-bh3" class="tab-panel">
                 <div class="form-group">
                     <label>Bilibili账号</label>
                     <input type="text" id="bh3Account" placeholder="请输入Bilibili账号">
                 </div>
-                <div class="form-group" style="margin-top:12px">
+                <div class="form-group">
                     <label>密码</label>
                     <input type="password" id="bh3Password" placeholder="请输入密码">
                 </div>
-                <div style="margin-top:20px;text-align:center">
-                    <button id="bh3LoginBtn" class="btn btn-primary">登录</button>
-                </div>
+                <button id="bh3LoginBtn" class="btn btn-primary btn-block">登录</button>
             </div>
-
         </section>
 
-        <!-- 屏幕监控页 -->
+        <!-- 屏幕监控 -->
         <section id="page-screen" class="page">
             <h2>屏幕监控</h2>
-            <p class="subtitle">从屏幕实时捕获并识别二维码，自动登录游戏</p>
-
-            <div class="scan-panel">
-                <div class="scan-controls">
-                    <select id="screenGameSelect" class="select">
-                        <option value="hk4e">原神</option>
-                        <option value="hkrpg">星穹铁道</option>
-                        <option value="nap">绝区零</option>
-                        <option value="bh3">崩坏3</option>
-                    </select>
-                    <select id="screenAccountSelect" class="select" style="flex:1">
-                        <option value="">-- 选择账号 --</option>
-                    </select>
-                    <button id="screenStartBtn" class="btn btn-primary">开始监视屏幕</button>
-                    <button id="screenStopBtn" class="btn btn-danger" style="display:none">停止</button>
+            <p class="subtitle">实时捕获屏幕二维码，自动登录游戏</p>
+            <div class="scan-layout">
+                <div class="scan-sidebar">
+                    <h3>监控设置</h3>
+                    <div class="form-group">
+                        <label>游戏</label>
+                        <select id="screenGameSelect">
+                            <option value="hk4e">原神</option>
+                            <option value="hkrpg">星穹铁道</option>
+                            <option value="nap">绝区零</option>
+                            <option value="bh3">崩坏3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>账号</label>
+                        <select id="screenAccountSelect">
+                            <option value="">-- 选择账号 --</option>
+                        </select>
+                    </div>
+                    <button id="screenStartBtn" class="btn btn-primary">开始监视</button>
+                    <button id="screenStopBtn" class="btn btn-danger" style="display:none">停止监视</button>
                 </div>
-                <div class="scan-preview">
-                    <video id="screenPreview" autoplay playsinline muted style="display:none"></video>
-                    <canvas id="screenCanvas" style="display:none"></canvas>
-                    <div id="screenPlaceholder">点击"开始监视屏幕"后选择要分享的屏幕窗口</div>
+                <div class="scan-main">
+                    <div class="scan-preview">
+                        <video id="screenPreview" autoplay playsinline muted style="display:none"></video>
+                        <canvas id="screenCanvas" style="display:none"></canvas>
+                        <div id="screenPlaceholder">选择屏幕窗口后在此预览</div>
+                    </div>
+                    <div id="screenStatus" class="status-bar">就绪</div>
+                    <div id="screenResult" class="result-area"></div>
                 </div>
-                <div id="screenStatus" class="status-bar">就绪</div>
-                <div id="screenResult" class="result-area"></div>
             </div>
         </section>
 
-        <!-- 直播监控页 -->
+        <!-- 直播监控 -->
         <section id="page-live" class="page">
             <h2>直播监控</h2>
-            <p class="subtitle">从B站/抖音直播间实时获取直播流并识别二维码</p>
-
-            <div class="scan-panel">
-                <div class="scan-controls">
-                    <select id="livePlatform" class="select">
-                        <option value="bilibili">B站</option>
-                        <option value="douyin">抖音</option>
-                    </select>
-                    <input type="text" id="liveRoomId" class="input" placeholder="输入直播间RID（纯数字）">
-                    <select id="liveGameSelect" class="select">
-                        <option value="hk4e">原神</option>
-                        <option value="hkrpg">星穹铁道</option>
-                        <option value="nap">绝区零</option>
-                        <option value="bh3">崩坏3</option>
-                    </select>
-                    <select id="liveAccountSelect" class="select" style="flex:1">
-                        <option value="">-- 选择账号 --</option>
-                    </select>
-                    <button id="liveStartBtn" class="btn btn-primary">开始监视直播间</button>
-                    <button id="liveStopBtn" class="btn btn-danger" style="display:none">停止</button>
+            <p class="subtitle">从B站/抖音直播流实时识别二维码</p>
+            <div class="scan-layout">
+                <div class="scan-sidebar">
+                    <h3>直播设置</h3>
+                    <div class="form-group">
+                        <label>平台</label>
+                        <select id="livePlatform">
+                            <option value="bilibili">B站</option>
+                            <option value="douyin">抖音</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>直播间RID</label>
+                        <input type="text" id="liveRoomId" class="input" placeholder="纯数字房间号">
+                    </div>
+                    <div class="form-group">
+                        <label>游戏</label>
+                        <select id="liveGameSelect">
+                            <option value="hk4e">原神</option>
+                            <option value="hkrpg">星穹铁道</option>
+                            <option value="nap">绝区零</option>
+                            <option value="bh3">崩坏3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>账号</label>
+                        <select id="liveAccountSelect">
+                            <option value="">-- 选择账号 --</option>
+                        </select>
+                    </div>
+                    <button id="liveStartBtn" class="btn btn-primary">开始监视</button>
+                    <button id="liveStopBtn" class="btn btn-danger" style="display:none">停止监视</button>
                 </div>
-                <div id="liveStatus" class="status-bar">就绪</div>
-                <div id="liveResult" class="result-area"></div>
+                <div class="scan-main">
+                    <div id="liveStatus" class="status-bar">就绪</div>
+                    <div id="liveResult" class="result-area"></div>
+                </div>
             </div>
         </section>
 
-        <!-- 账号管理页 -->
+        <!-- 账号管理 -->
         <section id="page-accounts" class="page">
             <div class="page-header">
                 <h2>账号管理</h2>
                 <button id="addAccountBtn" class="btn btn-primary">添加账号</button>
             </div>
             <p class="subtitle">管理已登录的米哈游账号，双击备注可编辑</p>
-
             <div class="table-container">
-                <table id="accountsTable">
+                <table>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -201,23 +208,22 @@
                         </tr>
                     </thead>
                     <tbody id="accountsTbody">
-                        <tr><td colspan="7" class="empty">暂无账号</td></tr>
+                        <tr><td colspan="7" class="empty">暂无账号，请先在"扫码登录"添加</td></tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- 系统设置页 -->
+        <!-- 系统设置 -->
         <section id="page-settings" class="page">
             <h2>系统设置</h2>
-            <p class="subtitle">配置扫描行为和偏好设置</p>
-
+            <p class="subtitle">配置扫描行为</p>
             <div class="settings-panel">
                 <h3>扫描设置</h3>
                 <div class="setting-item">
                     <div class="setting-info">
                         <div class="setting-label">启动后自动开始识别</div>
-                        <div class="setting-desc">打开屏幕监控页面时自动开始捕获屏幕并识别二维码</div>
+                        <div class="setting-desc">打开屏幕监控页面时自动开始捕获屏幕</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="cfgAutoStart">
@@ -237,7 +243,7 @@
                 <div class="setting-item">
                     <div class="setting-info">
                         <div class="setting-label">检测到二维码自动登录</div>
-                        <div class="setting-desc">识别到二维码时自动使用已选择的账号尝试登录</div>
+                        <div class="setting-desc">识别到二维码时自动使用选择的账号登录</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="cfgAutoLogin">
@@ -247,7 +253,7 @@
             </div>
         </section>
 
-        <!-- 极验验证码弹窗 -->
+        <!-- 极验弹窗 -->
         <div id="geetestModal" class="modal" style="display:none">
             <div class="modal-mask"></div>
             <div class="modal-content">
@@ -266,7 +272,6 @@
             <button class="menu-item menu-item-danger" data-action="delete">删除账号</button>
         </div>
 
-        <!-- 通知 -->
         <div id="toast" class="toast"></div>
     </main>
 
