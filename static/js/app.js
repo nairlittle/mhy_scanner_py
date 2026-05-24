@@ -115,10 +115,6 @@ async function startQRCodeLogin() {
         placeholder.textContent = '网络错误，请重试';
     }
 }
-    } catch (e) {
-        placeholder.textContent = '网络错误，请重试';
-    }
-}
 
 async function pollQRState(ticket) {
     try {
@@ -899,12 +895,7 @@ contextMenu.addEventListener('click', (e) => {
         const uid = cells[2] ? cells[2].textContent : '';
         navigator.clipboard.writeText(uid).then(() => toast('UID已复制', 'success'));
     } else if (action === 'copy-stoken') {
-        API.get('/api/accounts').then(r => {
-            const acc = (r.data || []).find(a => a.id == contextMenuRow);
-            if (acc) {
-                navigator.clipboard.writeText(acc.stoken).then(() => toast('SToken已复制', 'success'));
-            }
-        });
+        toast('SToken已不在API中返回', 'info');
     } else if (action === 'delete') {
         deleteAccount(contextMenuRow);
     }

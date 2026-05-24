@@ -3,7 +3,6 @@
 import time
 import uuid
 import random
-import hashlib
 import json
 from typing import Optional
 
@@ -243,7 +242,6 @@ async def qrcode_scan(
     # 步骤0: 获取game_token
     try:
         game_token = await get_game_token_by_stoken(stoken, mid)
-        print(f"[SCAN] game_token获取成功: {game_token[:30]}...")
     except Exception as e:
         return {"retcode": -1, "message": f"获取game_token失败: {str(e)}"}
 

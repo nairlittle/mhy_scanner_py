@@ -1,10 +1,8 @@
 """数据存储 - SQLite账号管理"""
 
 import sqlite3
-import json
 import os
 from typing import Optional
-from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "accounts.db")
 

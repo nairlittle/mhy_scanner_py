@@ -2,7 +2,6 @@
 
 import json
 import os
-from threading import Lock
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Config")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "userinfo.json")
@@ -16,8 +15,6 @@ DEFAULT_CONFIG = {
     "last_live_platform": "bilibili",
     "last_live_room_id": "",
 }
-
-_lock = Lock()
 
 
 def _ensure_config_dir():
@@ -50,25 +47,13 @@ def load_config() -> dict:
         return dict(DEFAULT_CONFIG)
 
 
-def save_config(config: dict):
-    """保存配置文件"""
-    _ensure_config_dir()
-    current = load_config()
-    current.update(config)
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(current, f, indent=4, ensure_ascii=False)
-
-
-def get_config() -> dict:
-    """获取完整配置"""
-    return load_config()
-
-
 def update_config(key: str, value) -> dict:
-    """更新单个配置项"""
+    """更新单个配置项（一次读+一次写）"""
     current = load_config()
     current[key] = value
-    save_config(current)
+    _ensure_config_dir()
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(current, f, indent=4, ensure_ascii=False)
     return current
 
 
@@ -84,4 +69,6 @@ def set_last_live(platform: str, room_id: str):
     current = load_config()
     current["last_live_platform"] = platform
     current["last_live_room_id"] = room_id
-    save_config(current)
+    _ensure_config_dir()
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(current, f, indent=4, ensure_ascii=False)

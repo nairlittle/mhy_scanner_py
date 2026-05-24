@@ -8,20 +8,25 @@ from ..schemas import AccountCreate, AccountUpdate, AccountResponse
 router = APIRouter(prefix="/api/accounts", tags=["accounts"])
 
 
+def _sanitize(account: dict) -> dict:
+    """移除敏感字段（stoken不返回给前端）"""
+    return {k: v for k, v in account.items() if k != "stoken"}
+
+
 @router.get("")
 async def list_accounts():
-    """获取所有账号"""
+    """获取所有账号（不含stoken）"""
     accounts = database.get_all_accounts()
-    return {"retcode": 0, "data": accounts}
+    return {"retcode": 0, "data": [_sanitize(a) for a in accounts]}
 
 
 @router.get("/{account_id}")
 async def get_account(account_id: int):
-    """获取单个账号"""
+    """获取单个账号（不含stoken）"""
     account = database.get_account(account_id)
     if not account:
         raise HTTPException(status_code=404, detail="账号不存在")
-    return {"retcode": 0, "data": account}
+    return {"retcode": 0, "data": _sanitize(account)}
 
 
 @router.post("")

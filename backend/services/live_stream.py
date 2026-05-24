@@ -3,7 +3,6 @@
 import asyncio
 import json
 import subprocess
-import re
 from typing import Optional, AsyncIterator
 from dataclasses import dataclass
 from enum import Enum

@@ -42,15 +42,16 @@ async def check_qrcode_state(ticket: str):
 async def qrcode_login_complete(ticket: str, uid: str, game_token: str):
     """扫码登录完成 - 获取并保存SToken"""
     result = await mhy_api.get_stoken_by_game_token(uid, game_token)
-    if result["retcode"] == 0:
-        name = await mhy_api.get_username_by_uid(uid)
-        account = database.add_account(
-            name=name,
-            stoken=result["stoken"],
-            uid=uid,
-            mid=result["mid"],
-            server="官服"
-        )
+    if result["retcode"] != 0:
+        return {"retcode": -1, "message": result.get("message", "获取SToken失败")}
+    name = await mhy_api.get_username_by_uid(uid)
+    account = database.add_account(
+        name=name,
+        stoken=result["stoken"],
+        uid=uid,
+        mid=result["mid"],
+        server="官服"
+    )
     return {"retcode": 0, "data": account}
 
 

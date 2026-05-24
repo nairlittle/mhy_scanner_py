@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from ..settings import get_config, update_config, load_config
+from ..settings import load_config, update_config
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
@@ -27,10 +27,11 @@ async def update_user_config(key: str, value: str = ""):
         val = True
     elif value.lower() == "false":
         val = False
-    elif value.isdigit():
-        val = int(value)
     else:
-        val = value
+        try:
+            val = int(value)
+        except ValueError:
+            val = value
 
     config = update_config(key, val)
     return JSONResponse(config)

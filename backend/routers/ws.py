@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-import struct
 from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
