@@ -82,6 +82,7 @@ async function startQRCodeLogin() {
     const placeholder = document.getElementById('qrcodePlaceholder');
     const refreshBtn = document.getElementById('qrcodeRefreshBtn');
     const status = document.getElementById('qrcodeStatus');
+    const qrBox = document.getElementById('qrcodeBox');
     
     refreshBtn.style.display = 'none';
     img.style.display = 'none';
@@ -89,19 +90,31 @@ async function startQRCodeLogin() {
     placeholder.textContent = '获取中...';
     status.textContent = '';
     
+    // 清除旧的二维码
+    qrBox.querySelectorAll('canvas').forEach(c => c.remove());
+    
     try {
         const r = await API.get('/api/auth/qrcode');
         if (r.url) {
-            img.src = r.url;
-            img.style.display = 'block';
+            // 用 JS 生成二维码图片
+            new QRCode(qrBox, {
+                text: r.url,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+            });
             placeholder.style.display = 'none';
             status.textContent = '请使用米游社APP扫码';
             
-            // 开始轮询
             qrPollTimer = setInterval(() => pollQRState(r.ticket), 1000);
         } else {
             placeholder.textContent = '获取失败，请重试';
         }
+    } catch (e) {
+        placeholder.textContent = '网络错误，请重试';
+    }
+}
     } catch (e) {
         placeholder.textContent = '网络错误，请重试';
     }

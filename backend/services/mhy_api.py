@@ -5,14 +5,11 @@ import uuid
 import random
 import hashlib
 import json
-import io
-import base64
 from typing import Optional
 
 import httpx
-import qrcode
 
-from .crypto import rsa_encrypt, hmac_sha256, md5
+from .crypto import rsa_encrypt, md5
 
 # === 常量 ===
 APP_VERSION = "2.76.1"
@@ -50,14 +47,6 @@ GAME_APP_IDS = {
 BBS_APP_ID = 2  # 米游社BBS扫码登录使用TearsOfThemis的app_id
 
 DEVICE_ID = str(uuid.uuid4()).upper()
-
-
-def _url_to_qrcode_dataurl(url: str) -> str:
-    """将URL文本生成QR码PNG图片的base64 data URL"""
-    img = qrcode.make(url, box_size=8, border=2)
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    return f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode()}"
 
 
 def _get_game_sdk_host(game: str) -> str:
@@ -118,12 +107,13 @@ def _api_post(url: str, body: dict, ds_body: str = "", ds_query: str = "") -> di
 # ============ 登录二维码 ============
 
 async def get_login_qrcode_url() -> tuple[str, str]:
-    """获取米游社BBS登录二维码（返回图片data URL和ticket）
+    """获取米游社BBS登录二维码URL和ticket
 
-    对齐原版: 使用 TearsOfThemis (app_id=2) 作为BBS扫码登录
+    Returns:
+        (qrcode_content_url, ticket) — URL文本由前端生成QR码图片
     """
     body_dict = {"app_id": BBS_APP_ID, "device": DEVICE_ID}
-    host = _get_game_sdk_host("hk4e")  # BBS登录复用hk4e的fetch/query接口
+    host = _get_game_sdk_host("hk4e")
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(
@@ -136,10 +126,8 @@ async def get_login_qrcode_url() -> tuple[str, str]:
             raise Exception(f"获取二维码失败: {data.get('message', '未知错误')}")
 
         url = data["data"]["url"]
-        # 对齐原版: ticket = url最后24个字符
         ticket = url[-24:] if len(url) >= 24 else url
-        qr_img = _url_to_qrcode_dataurl(url)
-        return qr_img, ticket
+        return url, ticket
 
 
 async def check_qrcode_state(ticket: str) -> dict:
