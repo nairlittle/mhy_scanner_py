@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from ..config import get_config, update_config, load_config
+from ..settings import get_config, update_config, load_config
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 

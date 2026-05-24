@@ -9,8 +9,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import init_db
-from .config import init_config
-from .routers import account, auth, scan, ws, config_route
+from .settings import init_config
+from .routers import account, auth, scan, ws, config
 
 
 @asynccontextmanager
@@ -40,7 +40,7 @@ app.include_router(account.router)
 app.include_router(auth.router)
 app.include_router(scan.router)
 app.include_router(ws.router)
-app.include_router(config_route.router)
+app.include_router(config.router)
 
 # 静态文件（前端）
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

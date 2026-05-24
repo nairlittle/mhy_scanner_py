@@ -6,8 +6,8 @@ from typing import Optional
 import cv2
 import numpy as np
 
-# 模型文件目录（相对于项目根目录）
-_MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "ScanModel")
+# 模型文件目录
+_MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models")
 
 
 class QRScanner:
