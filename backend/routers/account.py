@@ -37,7 +37,7 @@ async def create_account(req: AccountCreate):
         stoken=req.stoken,
         uid=req.uid,
         mid=req.mid or "",
-        server=req.server.value if hasattr(req.server, 'value') else str(req.server),
+        server=req.server.value,
         note=req.note or ""
     )
     return {"retcode": 0, "data": account}
@@ -47,7 +47,7 @@ async def create_account(req: AccountCreate):
 async def update_account(account_id: int, req: AccountUpdate):
     """更新账号"""
     update_data = {k: v for k, v in req.model_dump().items() if v is not None}
-    if "server" in update_data and hasattr(update_data["server"], 'value'):
+    if "server" in update_data:
         update_data["server"] = update_data["server"].value
     
     account = database.update_account(account_id, **update_data)

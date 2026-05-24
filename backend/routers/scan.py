@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 
 from .. import database
-from ..schemas import QRCodeScanRequest, LiveScanRequest
+from ..schemas import QRCodeScanRequest
 from ..services import mhy_api
 
 router = APIRouter(prefix="/api/scan", tags=["scan"])
@@ -20,7 +20,7 @@ async def scan_game_qr(req: QRCodeScanRequest):
         return {"retcode": -1, "message": "账号不存在"}
     
     result = await mhy_api.qrcode_scan(
-        game=req.game.value if hasattr(req.game, 'value') else req.game,
+        game=req.game.value,
         ticket=req.ticket,
         stoken=account["stoken"],
         uid=account["uid"],

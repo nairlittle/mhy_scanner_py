@@ -75,25 +75,6 @@ class QRScanner:
         except Exception as e:
             print(f"[ERROR] QR解码异常: {e}")
             return None
-    
-    def decode_multiple(self, frame: np.ndarray) -> list[str]:
-        """解码多个二维码（用于多码场景）"""
-        if frame is None or frame.size == 0:
-            return []
-        
-        try:
-            if len(frame.shape) == 2:
-                frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-            elif frame.shape[2] == 4:
-                frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
-            
-            if self._detector is not None:
-                results, _ = self._detector.detectAndDecode(frame)
-                return [r for r in results if r]
-            
-            return []
-        except Exception:
-            return []
 
 
 _scanner: Optional[QRScanner] = None

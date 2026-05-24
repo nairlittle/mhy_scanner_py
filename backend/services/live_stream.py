@@ -239,7 +239,7 @@ async def stream_frames(
     proc = extract_frames_from_url(info.url, fps, width, height)
     
     try:
-        for _ in range(300):  # 最多5分钟
+        for _ in range(600):  # 最多5分钟 (600帧 @ 2fps)
             frame = await asyncio.to_thread(read_frame, proc, width, height)
             if frame is None:
                 yield "ERROR:直播流断开"

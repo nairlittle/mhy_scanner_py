@@ -64,13 +64,6 @@ class LoginQRCodeResponse(BaseModel):
     ticket: str
 
 
-class LoginStateResponse(BaseModel):
-    """二维码状态响应"""
-    stat: str
-    game_token: Optional[str] = None
-    uid: Optional[str] = None
-
-
 class SMSSendRequest(BaseModel):
     """发送短信验证码请求"""
     mobile: str
@@ -91,12 +84,6 @@ class CookieLoginRequest(BaseModel):
     """Cookie登录请求"""
     cookie: str
     note: Optional[str] = ""
-
-
-class LiveScanRequest(BaseModel):
-    """直播扫码请求"""
-    platform: str
-    room_id: str
 
 
 class CaptchaResponse(BaseModel):

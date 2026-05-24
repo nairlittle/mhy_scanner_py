@@ -1,6 +1,7 @@
 """登录/认证路由"""
 
 import re
+from urllib.parse import unquote
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -95,7 +96,6 @@ async def bh3_bili_login(req: BH3LoginRequest):
         return {"retcode": -1, "message": result.get("message", "登录失败")}
     except Exception as e:
         return {"retcode": -1, "message": str(e)}
-    return {"retcode": -1, "message": result.get("message", "获取SToken失败")}
 
 
 @router.post("/sms/send", response_model=CaptchaResponse)
@@ -154,7 +154,7 @@ async def cookie_login(req: CookieLoginRequest):
     for item in cookie_str.replace(" ", "").split(";"):
         if "=" in item:
             key, value = item.split("=", 1)
-            cookies[key] = value
+            cookies[unquote(key)] = unquote(value)
     
     # 查找uid
     uid = cookies.get("stuid") or cookies.get("ltuid") or cookies.get("account_id")
