@@ -1,12 +1,12 @@
-"""直播流服务 - B站/抖音直播流URL获取与帧提取"""
+"""直播流服务 - B站/抖音直播流URL获取与帧提取（基于OpenCV VideoCapture）"""
 
 import asyncio
 import json
-import subprocess
 from typing import Optional, AsyncIterator
 from dataclasses import dataclass
 from enum import Enum
 
+import cv2
 import httpx
 import numpy as np
 
@@ -40,7 +40,6 @@ async def get_bilibili_stream_url(room_id: str) -> LiveStreamInfo:
     }
     
     async with httpx.AsyncClient(timeout=15) as client:
-        # 获取房间信息
         try:
             resp = await client.get(
                 "https://api.live.bilibili.com/room/v1/Room/room_init",
@@ -48,27 +47,24 @@ async def get_bilibili_stream_url(room_id: str) -> LiveStreamInfo:
                 headers=headers
             )
         except httpx.HTTPError as e:
-            print(f"[LIVE] B站 room_init HTTP错误: {e}")
             return LiveStreamInfo(LiveStatus.ERROR, message=f"网络请求失败: {e}")
-        
-        print(f"[LIVE] B站 room_init 返回: HTTP {resp.status_code}")
         
         try:
             data = resp.json()
         except Exception:
-            print(f"[LIVE] B站 room_init 非JSON响应: {resp.text[:300]}")
-            return LiveStreamInfo(LiveStatus.ERROR, message="B站API返回异常，可能被风控")
-        
-        print(f"[LIVE] B站 room_init code={data.get('code')} msg={data.get('message', '')}")
+            return LiveStreamInfo(LiveStatus.ERROR, message="B站API返回异常")
         
         if data.get("code") == 60004:
             return LiveStreamInfo(LiveStatus.ABSENT, message="直播间不存在")
         if data.get("code") != 0:
-            return LiveStreamInfo(LiveStatus.ERROR, message=f"B站API错误(code={data.get('code')}): {data.get('message', '')}")
+            return LiveStreamInfo(LiveStatus.ERROR, message=f"B站API错误: {data.get('message', '')}")
+        
+        live_status = data["data"]["live_status"]
+        if live_status != 1:
+            return LiveStreamInfo(LiveStatus.NOT_LIVE, message="主播未开播")
         
         real_room_id = data["data"]["room_id"]
         
-        # 获取播放地址
         resp2 = await client.get(
             "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo",
             params={
@@ -99,7 +95,7 @@ async def get_bilibili_stream_url(room_id: str) -> LiveStreamInfo:
 
 
 async def get_douyin_stream_url(room_id: str) -> LiveStreamInfo:
-    """获取抖音直播流地址 - 对齐原版 LiveDouyin::GetLiveStreamInfo"""
+    """获取抖音直播流地址"""
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36",
         "referer": "https://live.douyin.com/",
@@ -119,31 +115,23 @@ async def get_douyin_stream_url(room_id: str) -> LiveStreamInfo:
                 headers=headers,
             )
         except httpx.HTTPError as e:
-            print(f"[LIVE] 抖音 API HTTP错误: {e}")
             return LiveStreamInfo(LiveStatus.ERROR, message=f"网络请求失败: {e}")
-        
-        print(f"[LIVE] 抖音 API 返回: HTTP {resp.status_code}")
         
         try:
             data = resp.json()
         except Exception:
-            html_snippet = resp.text[:300].replace('\n', ' ')
-            print(f"[LIVE] 抖音 API 非JSON响应: {html_snippet}")
-            return LiveStreamInfo(LiveStatus.ERROR, message="抖音Cookie过期，API返回异常")
+            return LiveStreamInfo(LiveStatus.ERROR, message="抖音API返回异常")
         
         if data.get("status_code") != 0:
             return LiveStreamInfo(LiveStatus.ABSENT, message="直播间不存在或未开播")
         
         try:
             room_data = data["data"]["data"][0]
-            status = room_data["status"]
-            
-            if status != 2:
+            if room_data["status"] != 2:
                 return LiveStreamInfo(LiveStatus.NOT_LIVE, message="主播未开播")
             
             stream_url = room_data["stream_url"]
             
-            # 尝试多种格式获取flv地址
             if "live_core_sdk_data" in stream_url:
                 sdk_data = stream_url["live_core_sdk_data"]["pull_data"]
                 stream_data = json.loads(sdk_data["stream_data"])
@@ -173,47 +161,7 @@ async def get_stream_url(platform: LivePlatform, room_id: str) -> LiveStreamInfo
     return LiveStreamInfo(LiveStatus.ERROR, message="不支持的平台")
 
 
-# === FFmpeg帧提取 ===
-
-def extract_frames_from_url(
-    stream_url: str,
-    fps: float = 2.0,
-    width: int = 640,
-    height: int = 360
-) -> subprocess.Popen:
-    """启动FFmpeg进程从直播流提取帧，输出为raw RGB24数据到stdout"""
-    args = [
-        "ffmpeg",
-        "-re",
-        "-i", stream_url,
-        "-vf", f"fps={fps},scale={width}:{height}",
-        "-pix_fmt", "rgb24",
-        "-vcodec", "rawvideo",
-        "-an",
-        "-sn",
-        "-f", "rawvideo",
-        "pipe:1"
-    ]
-    try:
-        return subprocess.Popen(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            bufsize=width * height * 3
-        )
-    except FileNotFoundError:
-        raise RuntimeError("FFmpeg未安装，请下载ffmpeg.exe并加入PATH，或放到项目目录下")
-
-
-def read_frame(proc: subprocess.Popen, width: int, height: int) -> Optional[np.ndarray]:
-    """从FFmpeg进程读取一帧，返回numpy数组(RGB格式)"""
-    frame_size = width * height * 3
-    data = proc.stdout.read(frame_size)
-    if len(data) < frame_size:
-        return None
-    frame = np.frombuffer(data, dtype=np.uint8).reshape((height, width, 3))
-    return frame
-
+# === OpenCV VideoCapture 帧提取（无需FFmpeg） ===
 
 async def stream_frames(
     platform: LivePlatform,
@@ -222,11 +170,11 @@ async def stream_frames(
     height: int = 360,
     fps: float = 2.0
 ) -> AsyncIterator[np.ndarray | str]:
-    """异步生成器：持续从直播流中提取帧
+    """异步生成器：用OpenCV VideoCapture从直播流提取帧
     
     Yields:
-        np.ndarray: 一帧图像数据(RGB格式)
-        str: 错误/状态信息 (以 "ERROR:" 或 "STATUS:" 开头)
+        np.ndarray: 一帧BGR图像
+        str: 错误/状态信息 ("ERROR:" 或 "STATUS:" 开头)
     """
     info = await get_stream_url(platform, room_id)
     
@@ -236,18 +184,35 @@ async def stream_frames(
     
     yield f"STATUS:{info.status.value}:直播流已连接"
     
-    proc = extract_frames_from_url(info.url, fps, width, height)
+    def _read_loop():
+        cap = cv2.VideoCapture(info.url)
+        if not cap.isOpened():
+            raise RuntimeError("无法打开直播流")
+        try:
+            interval = 1.0 / fps
+            frame_count = 0
+            max_frames = int(fps * 300)  # 最多5分钟
+            
+            while frame_count < max_frames:
+                ret, frame = cap.read()
+                if not ret or frame is None:
+                    yield None
+                    break
+                frame = cv2.resize(frame, (width, height))
+                yield frame
+                frame_count += 1
+        finally:
+            cap.release()
     
+    gen = _read_loop()
     try:
-        for _ in range(600):  # 最多5分钟 (600帧 @ 2fps)
-            frame = await asyncio.to_thread(read_frame, proc, width, height)
+        while True:
+            frame = await asyncio.to_thread(next, gen, None)
             if frame is None:
                 yield "ERROR:直播流断开"
                 break
             yield frame
-    finally:
-        proc.terminate()
-        try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            proc.kill()
+    except StopIteration:
+        pass
+    except RuntimeError as e:
+        yield f"ERROR:{str(e)}"
